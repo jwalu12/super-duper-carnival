@@ -1,0 +1,25 @@
+[Unit]
+Description=Adshares local test node
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=ads
+Group=ads
+WorkingDirectory=/var/lib/adshares/node
+ExecStart=/usr/local/bin/adsd --init=true -w /var/lib/adshares/node
+Restart=always
+RestartSec=10
+TimeoutStopSec=30
+KillSignal=SIGTERM
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/adshares
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

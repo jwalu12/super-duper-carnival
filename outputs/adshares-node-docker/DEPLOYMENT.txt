@@ -1,0 +1,82 @@
+ADSHARES NODE - DOCKER DEPLOYMENT
+=================================
+
+This package starts a LOCAL TEST NETWORK by default.
+
+1. Open PowerShell in this folder.
+
+2. Create the local environment file:
+
+   Copy-Item .env.example .env
+
+3. Validate the Compose file:
+
+   docker compose config
+
+4. Build and start:
+
+   docker compose up -d --build
+
+5. Check status:
+
+   docker compose ps
+   docker compose logs --tail 100 node
+
+   This workstation uses host ports 18091 and 19091 because another running
+   Adshares test container already owns 8091 and 9091.
+
+6. Follow logs:
+
+   docker compose logs -f node
+
+7. Optional monitor:
+
+   docker compose --profile monitoring up -d monitor
+   docker compose logs -f monitor
+
+8. Stop while preserving data:
+
+   docker compose down
+
+DATA SAFETY
+-----------
+
+Node data is stored in Docker named volumes. Do not use:
+
+   docker compose down -v
+
+unless permanent deletion is intended.
+
+NETWORK SAFETY
+--------------
+
+Both ports bind to 127.0.0.1 by default. Before exposing either port publicly,
+understand its purpose and configure the host firewall. Never expose a wallet
+secret or node secret in docker-compose.yml or commit it to source control.
+
+MAINNET
+-------
+
+Do not switch this stack to mainnet using guessed values. An Adshares mainnet
+node requires a valid 4-hex-character node ID, a 64-hex-character secret,
+correct mainnet networking, synchronized time, and coordination with the
+network. Follow the official Adshares node documentation.
+
+TROUBLESHOOTING
+---------------
+
+Docker Desktop not running:
+   Start Docker Desktop, wait for the engine, then rerun the command.
+
+Port already in use:
+   Change P2P_HOST_PORT or OFFICE_HOST_PORT in .env.
+
+Build failure:
+   docker compose build --no-cache --progress=plain
+
+Container unhealthy:
+   docker compose logs --tail 200 node
+
+Inspect image binaries:
+   docker compose run --rm node adsd -v
+   docker compose run --rm node ads -v

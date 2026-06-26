@@ -1,0 +1,45 @@
+services:
+  - type: pserv
+    name: adshares-node-service
+    runtime: docker
+    plan: starter
+    region: ohio
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ID
+        value: "0001"
+      - key: INIT_NODE
+        value: "true"
+      - key: ADS_NODE_DIR
+        value: /home/ads/.adsd
+      - key: P2P_PORT
+        value: "8091"
+      - key: OFFICE_PORT
+        value: "9091"
+    disk:
+      name: adshares-node-data
+      mountPath: /home/ads/.adsd
+      sizeGB: 10
+
+  - type: cron
+    name: adshares-node-health-cron
+    runtime: docker
+    plan: starter
+    region: ohio
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: /usr/local/bin/render-cron-entrypoint.sh
+    schedule: "*/10 * * * *"
+    autoDeployTrigger: commit
+    envVars:
+      - key: ADS_NODE_HOST
+        fromService:
+          type: pserv
+          name: adshares-node-service
+          property: host
+      - key: ADS_NODE_PORT
+        value: "9091"
+      - key: ADS_HEALTH_TIMEOUT
+        value: "10"

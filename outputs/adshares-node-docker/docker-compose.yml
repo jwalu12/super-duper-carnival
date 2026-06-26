@@ -1,0 +1,89 @@
+name: adshares-node
+
+services:
+  node:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ADS_REF: ${ADS_REF:-v1.1.5}
+    image: adshares-node:${IMAGE_TAG:-v1.1.5}
+    container_name: adshares-node
+    init: true
+    restart: unless-stopped
+    environment:
+      NODE_ID: ${NODE_ID:-0001}
+      INIT_NODE: ${INIT_NODE:-true}
+      P2P_PORT: 8091
+      OFFICE_PORT: 9091
+    ports:
+      - "${P2P_BIND:-127.0.0.1}:${P2P_HOST_PORT:-8091}:8091"
+      - "${OFFICE_BIND:-127.0.0.1}:${OFFICE_HOST_PORT:-9091}:9091"
+    volumes:
+      - node-data:/home/ads/.adsd
+      - user-data:/home/ads/.ads
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cpus: ${CPU_LIMIT:-2.0}
+    mem_limit: ${MEMORY_LIMIT:-4g}
+    stop_grace_period: 30s
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - "import socket; s=socket.create_connection(('127.0.0.1', 9091), 3); s.close()"
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: "3"
+
+  monitor:
+    image: adshares-node:${IMAGE_TAG:-v1.1.5}
+    container_name: adshares-monitor
+    profiles:
+      - monitoring
+    entrypoint:
+      - python3
+      - /opt/adshares/monitor.py
+    command:
+      - --watch
+      - ${WATCH_INTERVAL:-30}
+      - --host
+      - node
+      - --port
+      - "9091"
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+    depends_on:
+      node:
+        condition: service_healthy
+    volumes:
+      - node-data:/home/ads/.adsd:ro
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "2"
+
+volumes:
+  node-data:
+  user-data:
