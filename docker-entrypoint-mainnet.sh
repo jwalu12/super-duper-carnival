@@ -20,17 +20,23 @@ try_chmod() {
 }
 
 # ============================================
-# Validate node ID (1-4 hex characters)
+# Validate node ID (1-8 hex characters)
+# Updated for 8-character node IDs (e.g., 6A3EFA00)
 # ============================================
 case "${NODE_ID}" in
     *[!0-9A-Fa-f]*|"")
-        echo "ERROR: NODE_ID must contain 1 to 4 hexadecimal characters." >&2
+        echo "ERROR: NODE_ID must contain only hexadecimal characters (0-9, A-F)." >&2
         exit 1
         ;;
 esac
 
-if [ "${#NODE_ID}" -gt 4 ]; then
-    echo "ERROR: NODE_ID must contain 1 to 4 hexadecimal characters." >&2
+if [ "${#NODE_ID}" -gt 8 ]; then
+    echo "ERROR: NODE_ID must contain 1 to 8 hexadecimal characters (got ${#NODE_ID})." >&2
+    exit 1
+fi
+
+if [ "${#NODE_ID}" -lt 1 ]; then
+    echo "ERROR: NODE_ID must contain at least 1 hexadecimal character." >&2
     exit 1
 fi
 

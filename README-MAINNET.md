@@ -8,7 +8,7 @@ You **must** have the following before starting:
 
 | Requirement | Description |
 |-------------|-------------|
-| **Node ID** | 4 hex characters (e.g., `A1B2`) registered in the Adshares network |
+| **Node ID** | 1-8 hex characters (e.g., `A1B2`, `6A3EFA00`) registered in the Adshares network |
 | **Secret Key** | 64 hex characters — your node's private key |
 | **ADS Tokens** | Sufficient balance (~10,000+ ADS) if creating a new node via `create_node` |
 | **VPS** | Cloud server with public static IP, Ubuntu 22.04 |
@@ -56,7 +56,7 @@ nano .env
 
 Fill in these values in `.env`:
 ```
-NODE_ID=YOUR_4_HEX_NODE_ID
+NODE_ID=YOUR_NODE_ID_HERE
 NODE_SECRET=YOUR_64_HEX_SECRET
 PUBLIC_IP=YOUR_VPS_PUBLIC_IP
 ```
@@ -86,7 +86,7 @@ docker compose -f docker-compose.mainnet.yml exec monitor python3 /opt/adshares/
 |------|---------|
 | `.env.mainnet.example` | Environment variable template |
 | `docker-compose.mainnet.yml` | Mainnet Docker Compose config |
-| `docker-entrypoint-mainnet.sh` | Entrypoint adapted for mainnet |
+| `docker-entrypoint-mainnet.sh` | Entrypoint adapted for mainnet (supports 1-8 char node IDs) |
 | `README-MAINNET.md` | This file |
 
 ## 🌐 Mainnet vs Testnet Differences
@@ -94,7 +94,7 @@ docker compose -f docker-compose.mainnet.yml exec monitor python3 /opt/adshares/
 | Setting | Testnet (Render) | Mainnet (VPS) |
 |---------|-----------------|---------------|
 | `INIT_NODE` | `true` | `false` |
-| `NODE_ID` | `0001` | Your assigned ID |
+| `NODE_ID` | `0001` (1-4 chars) | Your assigned ID (1-8 chars) |
 | `NODE_SECRET` | Default | Your 64-hex secret |
 | `P2P_PORT` | `8091` | `6510` |
 | `OFFICE_PORT` | `9091` | `6511` |
