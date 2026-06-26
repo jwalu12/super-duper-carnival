@@ -1,0 +1,12 @@
+# syntax=docker/dockerfile:1.7
+
+FROM python:3.12-slim
+
+WORKDIR /opt/adshares
+
+COPY render-healthcheck.py /opt/adshares/render-healthcheck.py
+COPY render-cron-entrypoint.sh /usr/local/bin/render-cron-entrypoint.sh
+
+RUN chmod 0755 /usr/local/bin/render-cron-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/render-cron-entrypoint.sh"]

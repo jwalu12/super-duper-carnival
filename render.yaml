@@ -28,7 +28,7 @@ services:
     runtime: docker
     plan: starter
     region: ohio
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./Dockerfile.cron
     dockerContext: .
     dockerCommand: /usr/local/bin/render-cron-entrypoint.sh
     schedule: "*/10 * * * *"
