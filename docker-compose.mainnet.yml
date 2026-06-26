@@ -1,0 +1,87 @@
+version: "3.8"
+
+# =============================================================================
+# ADSHARES MAINNET NODE — Docker Compose Configuration
+# =============================================================================
+# 
+# This configuration runs an Adshares ADS node on the mainnet.
+# Requirements:
+#   - VPS with public IP address
+#   - NODE_ID and NODE_SECRET registered in Adshares network
+#   - Firewall ports 6510 (P2P) and 6511 (office) open to the internet
+#   - NTP time synchronization enabled
+#
+# Usage:
+#   1. Copy .env.mainnet.example to .env
+#   2. Fill in NODE_ID, NODE_SECRET, and PUBLIC_IP
+#   3. docker compose -f docker-compose.mainnet.yml up -d --build
+#
+# =============================================================================
+
+services:
+  adshares-node:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: adshares-mainnet-node
+    restart: unless-stopped
+    # Expose P2P and office ports to the host (and thus the internet)
+    ports:
+      - "${P2P_PORT}:6510"
+      - "${OFFICE_PORT}:6511"
+    environment:
+      - NODE_ID=${NODE_ID}
+      - NODE_SECRET=${NODE_SECRET}
+      - P2P_PORT=6510
+      - OFFICE_PORT=6511
+      - INIT_NODE=${INIT_NODE:-false}
+      - ADS_NODE_DIR=/home/ads/.adsd
+      - PUBLIC_IP=${PUBLIC_IP}
+    volumes:
+      - adshares-node-data:/home/ads/.adsd
+    networks:
+      - adshares-net
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import socket; s=socket.create_connection(('127.0.0.1', 6511), 3); s.close()"]
+      interval: 30s
+      timeout: 5s
+      start_period: 120s
+      retries: 5
+    # Resource limits (adjust based on your VPS)
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+
+  # Optional: Health monitor that logs every minute
+  monitor:
+    image: ubuntu:22.04
+    container_name: adshares-mainnet-monitor
+    restart: unless-stopped
+    depends_on:
+      - adshares-node
+    environment:
+      - ADS_NODE_HOST=adshares-node
+      - ADS_NODE_PORT=6511
+    volumes:
+      - adshares-node-data:/home/ads/.adsd:ro
+      - ./monitor.py:/opt/adshares/monitor.py:ro
+    networks:
+      - adshares-net
+    command: >
+      sh -c "
+        apt-get update -qq && apt-get install -y -qq python3 procps > /dev/null 2>&1 &&
+        python3 /opt/adshares/monitor.py --host adshares-node --port 6511 --node-dir /home/ads/.adsd --watch 60
+      "
+
+volumes:
+  adshares-node-data:
+    driver: local
+
+networks:
+  adshares-net:
+    driver: bridge
