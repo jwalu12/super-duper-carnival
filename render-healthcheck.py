@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 
 def main() -> int:
     host = os.environ.get("ADS_NODE_HOST", "adshares-node-worker")
-    port = int(os.environ.get("ADS_NODE_PORT", "9091"))
+    port = int(os.environ.get("ADS_NODE_PORT", "10000"))
     timeout = float(os.environ.get("ADS_HEALTH_TIMEOUT", "10"))
     timestamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
 

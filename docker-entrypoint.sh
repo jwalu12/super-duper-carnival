@@ -4,8 +4,12 @@ set -eu
 NODE_DIR="${ADS_NODE_DIR:-/home/ads/.adsd}"
 NODE_ID="${NODE_ID:-0001}"
 P2P_PORT="${P2P_PORT:-8091}"
-OFFICE_PORT="${OFFICE_PORT:-9091}"
+OFFICE_PORT="${OFFICE_PORT:-${PORT:-9091}}"
 INIT_NODE="${INIT_NODE:-true}"
+
+try_chmod() {
+    chmod "$@" 2>/dev/null || echo "Warning: could not chmod $*" >&2
+}
 
 case "${NODE_ID}" in
     *[!0-9A-Fa-f]*|"")
@@ -20,7 +24,7 @@ if [ "${#NODE_ID}" -gt 4 ]; then
 fi
 
 mkdir -p "${NODE_DIR}/key"
-chmod 0700 "${NODE_DIR}" "${NODE_DIR}/key"
+try_chmod 0700 "${NODE_DIR}" "${NODE_DIR}/key"
 
 if [ ! -f "${NODE_DIR}/options.cfg" ]; then
     cat > "${NODE_DIR}/options.cfg" <<EOF
@@ -29,7 +33,7 @@ offi=${OFFICE_PORT}
 port=${P2P_PORT}
 addr=0.0.0.0
 EOF
-    chmod 0600 "${NODE_DIR}/options.cfg"
+    try_chmod 0600 "${NODE_DIR}/options.cfg"
 fi
 
 if [ -n "${NODE_SECRET_FILE:-}" ] && [ -f "${NODE_SECRET_FILE}" ]; then
@@ -45,7 +49,7 @@ if [ -n "${NODE_SECRET_FILE:-}" ] && [ -f "${NODE_SECRET_FILE}" ]; then
         exit 1
     fi
     printf '%s\n' "${secret}" > "${NODE_DIR}/key/key.txt"
-    chmod 0600 "${NODE_DIR}/key/key.txt"
+    try_chmod 0600 "${NODE_DIR}/key/key.txt"
 fi
 
 if [ "$#" -eq 0 ] || [ "$1" = "adsd" ]; then

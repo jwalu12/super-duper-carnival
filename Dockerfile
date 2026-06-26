@@ -65,13 +65,16 @@ ENV HOME=/home/ads \
     ADS_NODE_DIR=/home/ads/.adsd \
     ADS_USER_DIR=/home/ads/.ads
 
-USER ads
+# Render persistent disks are mounted by the platform at runtime. Keeping the
+# entrypoint as root lets it initialize that mounted directory even when the
+# platform-owned mount rejects chmod/chown from an unprivileged user.
+USER root
 WORKDIR /home/ads
 
-EXPOSE 8091 9091
+EXPOSE 8091 9091 10000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=5 \
-    CMD python3 -c "import socket; s=socket.create_connection(('127.0.0.1', 9091), 3); s.close()"
+    CMD python3 -c "import os, socket; port=int(os.environ.get('OFFICE_PORT') or os.environ.get('PORT') or 9091); s=socket.create_connection(('127.0.0.1', port), 3); s.close()"
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["adsd"]
