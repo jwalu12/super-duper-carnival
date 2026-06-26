@@ -4,6 +4,7 @@ FROM ubuntu:22.04 AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG ADS_REF=v1.1.5
+ARG ADS_BUILD_JOBS=1
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -25,7 +26,7 @@ RUN cmake \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_PROJECT_CONFIG=ads \
     && cmake --build /src/ads/build \
-        --parallel "$(nproc)" \
+        --parallel "${ADS_BUILD_JOBS}" \
         --target ads adsd
 
 FROM ubuntu:22.04
