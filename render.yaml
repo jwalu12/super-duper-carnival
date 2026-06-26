@@ -17,7 +17,7 @@ services:
       - key: P2P_PORT
         value: "8091"
       - key: OFFICE_PORT
-        value: "10000"
+        value: "9091"
     disk:
       name: adshares-node-data
       mountPath: /home/ads/.adsd
@@ -40,6 +40,6 @@ services:
           name: adshares-node-service
           property: host
       - key: ADS_NODE_PORT
-        value: "10000"
+        value: "9091"
       - key: ADS_HEALTH_TIMEOUT
         value: "10"
